@@ -1,0 +1,257 @@
+---
+title: "Untitled"
+author: "Yitao Liu"
+date: "2020/4/14"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+library(readxl)
+library(tidyverse)
+library(rvest)
+library(httr)
+library(jsonlite)
+library(curl)
+```
+
+
+```{r}
+## data of 02-03 to 17-18 seasons
+salarydata1 <- read_excel('NBASalaryData03-17.xlsx')
+salarydata1
+
+```
+
+```{r}
+## Write a function that get the salary data from website
+getSalary <- function(x,season=2019){
+  
+  # Get data
+  salary <- x %>% 
+    read_html() %>%
+    html_table(fill = TRUE)
+  salary <- data.frame(salary)
+  
+  # Change column name
+  names(salary)[names(salary) == "X1"] <- "RK"
+  names(salary)[names(salary) == "X2"] <- "player"
+  names(salary)[names(salary) == "X3"] <- "team"
+  names(salary)[names(salary) == "X4"] <- "salary"
+  
+  # Filter
+  salarydata <- salary %>% filter(!RK == 'RK')
+  
+  # Separate name and position
+  splitplayer <- strsplit(salarydata$player,',')
+  
+  position <- splitplayer %>% sapply('[',2)
+  position <- gsub(" ", "", position, fixed = TRUE)
+  
+  playername <- splitplayer %>% sapply('[',1)
+  
+  # Add name and position column
+  salarydata <- salarydata %>% mutate('position' = position) %>% mutate('player' = playername)
+  
+  # Change salary into numeric number
+  salarydata$salary <- as.numeric(gsub("[\\$,]", "", salarydata$salary))
+  
+  # Final data
+  finaldata <- select(salarydata, 'team', 'salary', 'player', 'position')
+  finaldata <- finaldata %>% mutate('season' = paste(as.character(season),as.character(season+1),sep='-'))
+  finaldata
+}
+```
+
+```{r}
+## Get the salary data of season 18-19 and season 19-20
+
+# 18-19 season data website address
+url18 <- 'http://www.espn.com/nba/salaries/_/year/2019'
+pages18 <- c('','/page/2','/page/3','/page/4','/page/5','/page/6','/page/7','/page/8','/page/9','/page/10','/page/11','/page/12','/page/13')
+url18 <- paste(url18,pages18,sep='')
+
+# Use the getSalary() function to get the data and concatenate the data together.
+salarydata18 <- rbind(getSalary(url18[1],2018),getSalary(url18[2],2018),getSalary(url18[3],2018),getSalary(url18[4],2018),getSalary(url18[5],2018),getSalary(url18[6],2018),getSalary(url18[7],2018),getSalary(url18[8],2018),getSalary(url18[9],2018),getSalary(url18[10],2018),getSalary(url18[11],2018),getSalary(url18[12],2018),getSalary(url18[13],2018))
+salarydata18
+
+# 19-20 season data website address
+url19 <- 'http://www.espn.com/nba/salaries'
+pages19 <- c('','/_/page/2','/_/page/3','/_/page/4','/_/page/5','/_/page/6','/_/page/7','/_/page/8','/_/page/9','/_/page/10','/_/page/11','/_/page/12','/_/page/13','/_/page/14')
+url19 <- paste(url19,pages19,sep='')
+
+# Use the getSalary() function to get the data and concatenate the data together.
+salarydata19 <- rbind(getSalary(url19[1]),getSalary(url19[2]),getSalary(url19[3]),getSalary(url19[4]),getSalary(url19[5]),getSalary(url19[6]),getSalary(url19[7]),getSalary(url19[8]),getSalary(url19[9]),getSalary(url19[10]),getSalary(url19[11]),getSalary(url19[12]),getSalary(url19[13]),getSalary(url19[14]))
+salarydata19
+
+```
+
+```{r}
+## Get final salary data
+salaryData <- rbind(salarydata1, salarydata18, salarydata19)
+salaryData %>% filter(season == '2018-2019')
+```
+
+```{r}
+## Future salary data
+x <- 'https://www.basketball-reference.com/contracts/players.html'
+futureSalary <- x %>% 
+    read_html() %>%
+    html_table(fill = TRUE)
+futureSalary <- data.frame(futureSalary)
+
+# Change columns name
+names(futureSalary)[names(futureSalary) == "Var.2"] <- "player"
+names(futureSalary)[names(futureSalary) == "Var.3"] <- "team"
+names(futureSalary)[names(futureSalary) == "Salary"] <- "2019-2020"
+names(futureSalary)[names(futureSalary) == "Salary.1"] <- "2020-2021"
+names(futureSalary)[names(futureSalary) == "Salary.2"] <- "2021-2022"
+names(futureSalary)[names(futureSalary) == "Salary.3"] <- "2022-2023"
+names(futureSalary)[names(futureSalary) == "Salary.4"] <- "2023-2024"
+names(futureSalary)[names(futureSalary) == "Salary.5"] <- "2024-2025"
+
+# Get useful data
+finalFutureSalary <- futureSalary %>% filter(!Var.1 == 'Rk') %>% 
+  filter(!player == '') %>% 
+  select('player', 'team', '2019-2020', '2020-2021', '2021-2022', '2022-2023', '2023-2024', '2024-2025')
+finalFutureSalary
+```
+
+```{r}
+## Get the stats data of season 02-03 to 08-09
+
+# The website address of season 02-03 to 08-09
+statsUrl1head <- 'https://stats.nba.com/stats/leagueLeaders?LeagueID=00&PerMode=PerGame&Scope=S&Season=200'
+yearN1 <- c(2,3,4,5,6,7,8)
+statsUrl1tail <- '&SeasonType=Regular+Season&StatCategory=PTS'
+statsUrl1 <- paste(statsUrl1head, as.character(yearN1), "-0", as.character((yearN1+1)), statsUrl1tail, sep='')
+statsUrl1
+
+getStats1 <- function(x){
+  stats <- x %>% 
+    curl() %>%
+    readLines() %>%
+    fromJSON()
+  stats$resultSet$headers
+  
+  # Create database
+  statsDt <- as.tibble(stats$resultSet$rowSet)
+  names(statsDt) <- stats$resultSet$headers
+  statsDt
+}
+
+getStats1(statsUrl1[1]) #season 02-03
+getStats1(statsUrl1[2]) #season 03-04
+getStats1(statsUrl1[3]) #season 04-05
+getStats1(statsUrl1[4]) #season 05-06
+getStats1(statsUrl1[5]) #season 06-07
+getStats1(statsUrl1[6]) #season 07-08
+getStats1(statsUrl1[7]) #season 08-09
+```
+
+```{r}
+# Get the stats data of season 09-10
+url0910 <- 'https://stats.nba.com/stats/leagueLeaders?LeagueID=00&PerMode=PerGame&Scope=S&Season=2009-10&SeasonType=Regular+Season&StatCategory=PTS'
+stats <- url0910 %>% 
+  curl() %>%
+  readLines() %>%
+  fromJSON()
+  
+stats$resultSet$headers
+
+# Create database
+statsDt0910 <- as.tibble(stats$resultSet$rowSet)
+names(statsDt0910) <- stats$resultSet$headers
+statsDt0910
+```
+
+```{r}
+## Get the stats data of season 10-11 to 19-20
+
+# The website address of season 10-11 to 19-20
+statsUrl2head <- 'https://stats.nba.com/stats/leagueLeaders?LeagueID=00&PerMode=PerGame&Scope=S&Season=20'
+yearN2 <- c(10,11,12,13,14,15,16,17,18,19)
+statsUrl2tail <- '&SeasonType=Regular+Season&StatCategory=PTS'
+statsUrl2 <- paste(statsUrl2head, as.character(yearN2), "-", as.character((yearN2+1)), statsUrl2tail, sep='')
+statsUrl2
+
+getStats2 <- function(x){
+  stats <- x %>% 
+    curl() %>%
+    readLines() %>%
+    fromJSON()
+  stats$resultSet$headers
+  
+  # Create database
+  statsDt <- as.tibble(stats$resultSet$rowSet)
+  names(statsDt) <- stats$resultSet$headers
+  statsDt
+}
+
+getStats1(statsUrl2[1]) #season 10-11
+getStats1(statsUrl2[2]) #season 11-12
+getStats1(statsUrl2[3]) #season 12-13
+getStats1(statsUrl2[4]) #season 13-14
+getStats1(statsUrl2[5]) #season 14-15
+getStats1(statsUrl2[6]) #season 15-16
+getStats1(statsUrl2[7]) #season 16-17
+getStats1(statsUrl2[8]) #season 17-18
+getStats1(statsUrl2[9]) #season 18-19
+getStats1(statsUrl2[10]) #season 19-20
+```
+
+```{r}
+## Function that read stats csv files and add season column
+getStatsFile <- function(season){ 
+  data <- read_csv(file = paste('NBAstats Files/stats-',season,'.csv',sep = ''))
+  
+  firstN = substr(season,1,2)
+  secondN = substr(season,3,4)
+  data <- data %>% mutate('season' = paste('20',firstN,'-20',secondN,sep=''))
+}
+
+s0203 <- getStatsFile('0203')
+s0304 <- getStatsFile('0304')
+s0405 <- getStatsFile('0405')
+s0506 <- getStatsFile('0506')
+s0607 <- getStatsFile('0607')
+s0708 <- getStatsFile('0708')
+s0809 <- getStatsFile('0809')
+s0910 <- getStatsFile('0910')
+s1011 <- getStatsFile('1011')
+s1112 <- getStatsFile('1112')
+s1213 <- getStatsFile('1213')
+s1314 <- getStatsFile('1314')
+s1415 <- getStatsFile('1415')
+s1516 <- getStatsFile('1516')
+s1617 <- getStatsFile('1617')
+s1718 <- getStatsFile('1718')
+s1819 <- getStatsFile('1819')
+s1920 <- getStatsFile('1920')
+
+statsData <- rbind(s0203,s0304,s0405,s0506,s0607,s0708,s0809,s0910,s1011,s1112,s1213,s1314,s1415,s1516,s1617,s1718,s1819,s1920)
+statsData
+```
+
+```{r}
+library("ggpubr")
+stdata <- read_csv('statsData0203-1920.csv')
+stdata
+
+
+## Select useful stats data
+#selected_stdata <- stdata %>% select(PLAYER,GP,MIN,FGM,FG_PCT,FG3M,FG3_PCT,FTM,FT_PCT,REB,AST,STL,BLK,TOV,PTS,EFF,season)
+#selected_stdata
+
+# Read salary data
+sldata <- read_csv('salaryData0203-1920.csv')
+selected_sldata <- sldata %>% select(player, position,salary,season)
+
+# Change the column name so that its easy to join the data.
+colnames(selected_sldata)[which(names(selected_sldata) == "player")] <- "PLAYER"
+selected_sldata
+
+# Join the salary data and stats data
+finaldata <- merge(selected_sldata,stdata,by = c("PLAYER","season"))
+finaldata
+
+```

@@ -1,0 +1,145 @@
+---
+title: "Untitled"
+author: "Yitao Liu"
+date: "2020/4/30"
+output: html_document
+---
+```{r}
+library("ggpubr")
+library(Hmisc)
+library(corrplot)
+
+finaldata <- read_csv('finalData0203-1920.csv')
+finaldata
+
+logSalary <- log(finaldata$salary)
+logSalary
+
+finaldata <- finaldata %>% mutate('logsalary' = logSalary)
+finaldata
+
+##get useful column variables in order to analyse.
+model_data <- finaldata %>% select(salary,logsalary,GP,MIN,FGM,FGA,FG_PCT,FG3M,FG3A,FG3_PCT,FTM,FTA,FT_PCT,OREB,DREB,REB,AST,STL,BLK,TOV,PTS,EFF)
+model_data
+
+```
+
+```{r}
+model_data
+
+ggplot(model_data, aes(x = salary)) + geom_histogram() + ggtitle("salary dist")
+ggplot(model_data, aes(x = logsalary)) + geom_histogram() + ggtitle("logsalary dist")
+
+ggplot(model_data, aes(x = GP)) + geom_histogram() + ggtitle("GP dist")
+ggplot(model_data, aes(x = MIN)) + geom_histogram() + ggtitle("MIN dist")
+ggplot(model_data, aes(x = FGM)) + geom_histogram() + ggtitle("FGM dist")
+ggplot(model_data, aes(x = FGA)) + geom_histogram() + ggtitle("FGA dist")
+ggplot(model_data, aes(x = FG_PCT)) + geom_histogram() + ggtitle("FG_PCT dist")
+ggplot(model_data, aes(x = FG3M)) + geom_histogram() + ggtitle("FG3M dist")
+ggplot(model_data, aes(x = FG3A)) + geom_histogram() + ggtitle("FG3A dist")
+ggplot(model_data, aes(x = FG3_PCT)) + geom_histogram() + ggtitle("FG3_PCT dist")
+ggplot(model_data, aes(x = FTM)) + geom_histogram() + ggtitle("FTM dist")
+ggplot(model_data, aes(x = FTA)) + geom_histogram() + ggtitle("FTA dist")
+ggplot(model_data, aes(x = FT_PCT)) + geom_histogram() + ggtitle("FT_PCT dist")
+ggplot(model_data, aes(x = OREB)) + geom_histogram() + ggtitle("OREB dist")
+ggplot(model_data, aes(x = DREB)) + geom_histogram() + ggtitle("DREB dist")
+ggplot(model_data, aes(x = REB)) + geom_histogram() + ggtitle("REB dist")
+ggplot(model_data, aes(x = AST)) + geom_histogram() + ggtitle("AST dist")
+ggplot(model_data, aes(x = STL)) + geom_histogram() + ggtitle("STL dist")
+ggplot(model_data, aes(x = BLK)) + geom_histogram() + ggtitle("BLK dist")
+ggplot(model_data, aes(x = TOV)) + geom_histogram() + ggtitle("TOV dist")
+ggplot(model_data, aes(x = PTS)) + geom_histogram() + ggtitle("PTS dist")
+ggplot(model_data, aes(x = EFF)) + geom_histogram() + ggtitle("EFF dist")
+```
+
+```{r}
+
+ggplot(model_data, aes(x = salary)) + geom_density() + ggtitle("salary dist")
+ggplot(model_data, aes(x = logsalary)) + geom_density() + ggtitle("logsalary dist")
+
+ggplot(model_data, aes(x = GP)) + geom_density() + ggtitle("GP dist")
+ggplot(model_data, aes(x = MIN)) + geom_density() + ggtitle("MIN dist")
+ggplot(model_data, aes(x = FGM)) + geom_density() + ggtitle("FGM dist")
+ggplot(model_data, aes(x = FGA)) + geom_density() + ggtitle("FGA dist")
+ggplot(model_data, aes(x = FG_PCT)) + geom_density() + ggtitle("FG_PCT dist")
+ggplot(model_data, aes(x = FG3M)) + geom_density() + ggtitle("FG3M dist")
+ggplot(model_data, aes(x = FG3A)) + geom_density() + ggtitle("FG3A dist")
+ggplot(model_data, aes(x = FG3_PCT)) + geom_density() + ggtitle("FG3_PCT dist")
+ggplot(model_data, aes(x = FTM)) + geom_density() + ggtitle("FTM dist")
+ggplot(model_data, aes(x = FTA)) + geom_density() + ggtitle("FTA dist")
+ggplot(model_data, aes(x = FT_PCT)) + geom_density() + ggtitle("FT_PCT dist")
+ggplot(model_data, aes(x = OREB)) + geom_density() + ggtitle("OREB dist")
+ggplot(model_data, aes(x = DREB)) + geom_density() + ggtitle("DREB dist")
+ggplot(model_data, aes(x = REB)) + geom_density() + ggtitle("REB dist")
+ggplot(model_data, aes(x = AST)) + geom_density() + ggtitle("AST dist")
+ggplot(model_data, aes(x = STL)) + geom_density() + ggtitle("STL dist")
+ggplot(model_data, aes(x = BLK)) + geom_density() + ggtitle("BLK dist")
+ggplot(model_data, aes(x = TOV)) + geom_density() + ggtitle("TOV dist")
+ggplot(model_data, aes(x = PTS)) + geom_density() + ggtitle("PTS dist")
+ggplot(model_data, aes(x = EFF)) + geom_density() + ggtitle("EFF dist")
+```
+
+```{r}
+ggplot(model_data, aes(x = GP, y = salary)) + geom_point() + ggtitle("GP vs salary")
+ggplot(model_data, aes(x = MIN, y = salary)) + geom_point() + ggtitle("MIN vs salary")
+ggplot(model_data, aes(x = FGM, y = salary)) + geom_point() + ggtitle("FGM vs salary")
+ggplot(model_data, aes(x = FGA, y = salary)) + geom_point() + ggtitle("FGA vs salary")
+ggplot(model_data, aes(x = FG_PCT, y = salary)) + geom_point() + ggtitle("FG_PCT vs salary")
+ggplot(model_data, aes(x = FG3M, y = salary)) + geom_point() + ggtitle("FG3M vs salary")
+ggplot(model_data, aes(x = FG3A, y = salary)) + geom_point() + ggtitle("FG3A vs salary")
+ggplot(model_data, aes(x = FG3_PCT, y = salary)) + geom_point() + ggtitle("FG3_PCT vs salary")
+ggplot(model_data, aes(x = FTM, y = salary)) + geom_point() + ggtitle("FTM vs salary")
+ggplot(model_data, aes(x = FTA, y = salary)) + geom_point() + ggtitle("FTA vs salary")
+ggplot(model_data, aes(x = FT_PCT, y = salary)) + geom_point() + ggtitle("FT_PCT vs salary")
+ggplot(model_data, aes(x = OREB, y = salary)) + geom_point() + ggtitle("OREB vs salary")
+ggplot(model_data, aes(x = DREB, y = salary)) + geom_point() + ggtitle("DREB vs salary")
+ggplot(model_data, aes(x = REB, y = salary)) + geom_point() + ggtitle("REB vs salary")
+ggplot(model_data, aes(x = AST, y = salary)) + geom_point() + ggtitle("AST vs salary")
+ggplot(model_data, aes(x = STL, y = salary)) + geom_point() + ggtitle("STL vs salary")
+ggplot(model_data, aes(x = BLK, y = salary)) + geom_point() + ggtitle("BLK vs salary")
+ggplot(model_data, aes(x = TOV, y = salary)) + geom_point() + ggtitle("TOV vs salary")
+ggplot(model_data, aes(x = PTS, y = salary)) + geom_point() + ggtitle("PTS vs salary")
+ggplot(model_data, aes(x = EFF, y = salary)) + geom_point() + ggtitle("EFF vs salary")
+
+```
+
+```{r}
+ggplot(model_data, aes(x = GP, y = logsalary)) + geom_point() + ggtitle("GP vs salary")
+ggplot(model_data, aes(x = MIN, y = logsalary)) + geom_point() + ggtitle("MIN vs salary")
+ggplot(model_data, aes(x = FGM, y = logsalary)) + geom_point() + ggtitle("FGM vs salary")
+ggplot(model_data, aes(x = FGA, y = logsalary)) + geom_point() + ggtitle("FGA vs salary")
+ggplot(model_data, aes(x = FG_PCT, y = logsalary)) + geom_point() + ggtitle("FG_PCT vs salary")
+ggplot(model_data, aes(x = FG3M, y = logsalary)) + geom_point() + ggtitle("FG3M vs salary")
+ggplot(model_data, aes(x = FG3A, y = logsalary)) + geom_point() + ggtitle("FG3A vs salary")
+ggplot(model_data, aes(x = FG3_PCT, y = logsalary)) + geom_point() + ggtitle("FG3_PCT vs salary")
+ggplot(model_data, aes(x = FTM, y = logsalary)) + geom_point() + ggtitle("FTM vs salary")
+ggplot(model_data, aes(x = FTA, y = logsalary)) + geom_point() + ggtitle("FTA vs salary")
+ggplot(model_data, aes(x = FT_PCT, y = logsalary)) + geom_point() + ggtitle("FT_PCT vs salary")
+ggplot(model_data, aes(x = OREB, y = logsalary)) + geom_point() + ggtitle("OREB vs salary")
+ggplot(model_data, aes(x = DREB, y = logsalary)) + geom_point() + ggtitle("DREB vs salary")
+ggplot(model_data, aes(x = REB, y = logsalary)) + geom_point() + ggtitle("REB vs salary")
+ggplot(model_data, aes(x = AST, y = logsalary)) + geom_point() + ggtitle("AST vs salary")
+ggplot(model_data, aes(x = STL, y = logsalary)) + geom_point() + ggtitle("STL vs salary")
+ggplot(model_data, aes(x = BLK, y = logsalary)) + geom_point() + ggtitle("BLK vs salary")
+ggplot(model_data, aes(x = TOV, y = logsalary)) + geom_point() + ggtitle("TOV vs salary")
+ggplot(model_data, aes(x = PTS, y = logsalary)) + geom_point() + ggtitle("PTS vs salary")
+ggplot(model_data, aes(x = EFF, y = logsalary)) + geom_point() + ggtitle("EFF vs salary")
+
+```
+
+```{r}
+
+
+selected_model_data <- model_data %>% select(logsalary, GP, MIN, FGM, FGA, FG_PCT, FG3M, FG3A, FG3_PCT, FTM, FTA, FT_PCT, OREB, DREB, REB, AST, STL, BLK, TOV, PTS, EFF)
+
+data_corr1 <- rcorr(as.matrix(selected_model_data))
+data_corr1
+
+
+```
+
+```{r}
+
+data_corr2 <- cor(selected_model_data) 
+corrplot(corr = data_corr2)
+```
