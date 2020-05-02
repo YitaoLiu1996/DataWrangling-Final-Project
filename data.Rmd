@@ -64,9 +64,11 @@ getSalary <- function(x,season=2019){
 
 ```{r}
 ## Get the salary data of season 18-19 and season 19-20
-
+source("D:/data wrangling/Data Wrangling Final Project/NBA api-keys.R") ## My api key is saved in this file
 # 18-19 season data website address
-url18 <- 'http://www.espn.com/nba/salaries/_/year/2019'
+
+
+url18
 pages18 <- c('','/page/2','/page/3','/page/4','/page/5','/page/6','/page/7','/page/8','/page/9','/page/10','/page/11','/page/12','/page/13')
 url18 <- paste(url18,pages18,sep='')
 
@@ -75,7 +77,7 @@ salarydata18 <- rbind(getSalary(url18[1],2018),getSalary(url18[2],2018),getSalar
 salarydata18
 
 # 19-20 season data website address
-url19 <- 'http://www.espn.com/nba/salaries'
+url19
 pages19 <- c('','/_/page/2','/_/page/3','/_/page/4','/_/page/5','/_/page/6','/_/page/7','/_/page/8','/_/page/9','/_/page/10','/_/page/11','/_/page/12','/_/page/13','/_/page/14')
 url19 <- paste(url19,pages19,sep='')
 
@@ -93,8 +95,12 @@ salaryData %>% filter(season == '2018-2019')
 
 ```{r}
 ## Future salary data
-x <- 'https://www.basketball-reference.com/contracts/players.html'
-futureSalary <- x %>% 
+
+source("D:/data wrangling/Data Wrangling Final Project/NBA api-keys.R") ## My api key is saved in this file
+
+urlslry
+
+futureSalary <- urlslry %>% 
     read_html() %>%
     html_table(fill = TRUE)
 futureSalary <- data.frame(futureSalary)
@@ -119,10 +125,12 @@ finalFutureSalary
 ```{r}
 ## Get the stats data of season 02-03 to 08-09
 
+source("D:/data wrangling/Data Wrangling Final Project/NBA api-keys.R") ## My api key is saved in this file.
+
 # The website address of season 02-03 to 08-09
-statsUrl1head <- 'https://stats.nba.com/stats/leagueLeaders?LeagueID=00&PerMode=PerGame&Scope=S&Season=200'
+statsUrl1head
 yearN1 <- c(2,3,4,5,6,7,8)
-statsUrl1tail <- '&SeasonType=Regular+Season&StatCategory=PTS'
+statsUrl1tail
 statsUrl1 <- paste(statsUrl1head, as.character(yearN1), "-0", as.character((yearN1+1)), statsUrl1tail, sep='')
 statsUrl1
 
@@ -149,8 +157,11 @@ getStats1(statsUrl1[7]) #season 08-09
 ```
 
 ```{r}
-# Get the stats data of season 09-10
-url0910 <- 'https://stats.nba.com/stats/leagueLeaders?LeagueID=00&PerMode=PerGame&Scope=S&Season=2009-10&SeasonType=Regular+Season&StatCategory=PTS'
+## Get the stats data of season 09-10
+
+source("D:/data wrangling/Data Wrangling Final Project/NBA api-keys.R") ## My api key is saved in this file
+
+url0910
 stats <- url0910 %>% 
   curl() %>%
   readLines() %>%
@@ -167,10 +178,12 @@ statsDt0910
 ```{r}
 ## Get the stats data of season 10-11 to 19-20
 
+source("D:/data wrangling/Data Wrangling Final Project/NBA api-keys.R") ## My api key is saved in this file
+
 # The website address of season 10-11 to 19-20
-statsUrl2head <- 'https://stats.nba.com/stats/leagueLeaders?LeagueID=00&PerMode=PerGame&Scope=S&Season=20'
+statsUrl2head
 yearN2 <- c(10,11,12,13,14,15,16,17,18,19)
-statsUrl2tail <- '&SeasonType=Regular+Season&StatCategory=PTS'
+statsUrl2tail
 statsUrl2 <- paste(statsUrl2head, as.character(yearN2), "-", as.character((yearN2+1)), statsUrl2tail, sep='')
 statsUrl2
 
