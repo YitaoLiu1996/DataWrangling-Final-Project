@@ -8,10 +8,32 @@ output: html_document
 library("ggpubr")
 library(Hmisc)
 library(corrplot)
+library(tidyverse)
 
+## Read the file 
 finaldata <- read_csv('finalData0203-1920.csv')
+
 finaldata
 
+```
+
+
+```{r}
+## Find the teams with the most total salary
+finaldata %>% filter(season == '2018-2019') %>%
+  group_by(TEAM) %>%
+  summarise(totalSalary = sum(salary)) %>% 
+  arrange(desc(totalSalary))
+
+
+## Get the salary graph of LeBron James
+finaldata %>% filter(PLAYER == 'LeBron James') %>%
+  ggplot(aes(season,salary)) + geom_point()
+```
+
+
+```{r}
+## Add a log transformation of salary.
 logSalary <- log(finaldata$salary)
 logSalary
 
@@ -82,15 +104,22 @@ ggplot(model_data, aes(x = BLK)) + geom_density() + ggtitle("BLK dist")
 ggplot(model_data, aes(x = TOV)) + geom_density() + ggtitle("TOV dist")
 ggplot(model_data, aes(x = PTS)) + geom_density() + ggtitle("PTS dist")
 ggplot(model_data, aes(x = EFF)) + geom_density() + ggtitle("EFF dist")
+
+
+ggplot(model_data, aes(x = AST)) + geom_density() + ggtitle("AST dist")
+ggplot(model_data, aes(x = EFF)) + geom_density() + ggtitle("EFF dist")
+ggplot(model_data, aes(x = FG3M)) + geom_density() + ggtitle("FG3M dist")
+ggplot(model_data, aes(x = FT_PCT)) + geom_density() + ggtitle("FT_PCT dist")
 ```
 
 ```{r}
 ## Salary points
 ggplot(model_data, aes(x = GP, y = salary)) + geom_point() + ggtitle("GP vs salary")
+
 ggplot(model_data, aes(x = MIN, y = salary)) + geom_point() + ggtitle("MIN vs salary")
 ggplot(model_data, aes(x = FGM, y = salary)) + geom_point() + ggtitle("FGM vs salary")
 ggplot(model_data, aes(x = FGA, y = salary)) + geom_point() + ggtitle("FGA vs salary")
-ggplot(model_data, aes(x = FG_PCT, y = salary)) + geom_point() + ggtitle("FG_PCT vs salary")
+ggplot(model_data, aes(x = FG_PCT, y = salary)) + geom_point() + ggtitle("FG_PCT vs sSalary")
 ggplot(model_data, aes(x = FG3M, y = salary)) + geom_point() + ggtitle("FG3M vs salary")
 ggplot(model_data, aes(x = FG3A, y = salary)) + geom_point() + ggtitle("FG3A vs salary")
 ggplot(model_data, aes(x = FG3_PCT, y = salary)) + geom_point() + ggtitle("FG3_PCT vs salary")
